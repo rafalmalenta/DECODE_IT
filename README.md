@@ -14,4 +14,4 @@ c k w [liczba metrów, udźwig Toma oraz waga nawozu]
 c k w [następny test]
 Wypisz t linii zawierających słowo “yes” jeśli Tom jest w stanie wykonać zadanie lub “no” jeśli nawóz przeciąży go i nie dałby rady go donieść.
 
-
+##Quest 1 
