@@ -8,16 +8,11 @@ class Network
         $this->connections[0][1] = $connection[1];
     }
     public function addConnection($connection){
-        //array_push($this->connections[count($this->connections)+1],$connection);
         $this->connections[count($this->connections)] = $connection;
-        //$this->connections[count($this->connections)][1] = $connection[1];
+
     }
     public function checkIfIPExist($IP){
         foreach ($this->connections as $connection){
-//            echo "hej";
-//            var_dump($connection);
-//            echo "eshej";
-//            var_dump($IP);
             if($connection[0] == $IP or $connection[1] == $IP)
                 return true;
         }
@@ -27,16 +22,29 @@ class Network
         return $this->connections;
     }
     public function joinConnections($array){
-        //var_dump($network->getConnections());
         $this->connections = array_merge($this->connections, $array);
         unset($network);
     }
-
+    public function checkIfConnectionExist($ip1, $ip2){
+        $firstIP = false;
+        $secondIP = false;
+        foreach ($this->connections as $connection){
+            if($ip1 == $connection[0] or $ip1 == $connection[1])
+                $firstIP = true;
+            if($ip2 == $connection[0] or $ip2 == $connection[1])
+                $secondIP = true;
+        }
+        if ($firstIP and $secondIP)
+            return true;
+        else return false;
+    }
 }
 
 $stdin = fopen('php://stdin', 'r');
 $networksArray = [];
-while(!feof($stdin)){
+$output = [];
+
+while(!feof($stdin)) {
     $line = explode(" ", trim(fgets($stdin)));
     $action = $line[0];
     $addresses = [];
@@ -44,31 +52,45 @@ while(!feof($stdin)){
     $addresses[] = $line[2];
 
     if ($action == "B") {
-       $networksToJoin = [];
-       $id =[];
-       foreach ($networksArray as $index=>$network ){
-           if($network->checkIfIPExist($line[1])){
-               $networksToJoin[] = $network;
-               $id[] = $index;
-           }
-           if($network->checkIfIPExist($line[2])){
-               $id[] = $index;
-               $networksToJoin[] = $network;
-           }
-       }
-       if(count($networksToJoin) == 0)
-           $networksArray[] = new Network($addresses);
-       if(count($networksToJoin) == 1){
-           $networksArray[0]->addConnection($addresses);
-       }
-       if(count($networksToJoin) == 2) {
-           var_dump("aex",$id[1]);
-           $array = $networksToJoin[1]->getConnections();
-           unset($networksArray[$id[1]]);
-           $networksToJoin[0]->joinConnections($array);
-       }
-
+        $networksToJoin = [];
+        $id = [];
+        foreach ($networksArray as $index => $network) {
+            if ($network->checkIfIPExist($line[1])) {
+                $networksToJoin[] = $network;
+                $id[] = $index;
+            }
+            if ($network->checkIfIPExist($line[2])) {
+                $id[] = $index;
+                $networksToJoin[] = $network;
+            }
+        }
+        if (count($networksToJoin) == 0)
+            $networksArray[] = new Network($addresses);
+        if (count($networksToJoin) == 1) {
+            $networksArray[0]->addConnection($addresses);
+        }
+        if (count($networksToJoin) == 2) {
+            $array = $networksToJoin[1]->getConnections();
+            unset($networksArray[$id[1]]);
+            $networksToJoin[0]->joinConnections($array);
+        }
     }
-    echo "final";
-    var_dump($networksArray);
+    if ($action == "T") {
+        $control = false;
+        foreach ($networksArray as $index => $network) {
+            if ($network->checkIfConnectionExist($line[1], $line[2])) {
+                $control = true;
+            }
+        }
+        if ($control)
+            $output[] = "T \n";
+        else
+            $output[] = "N \n";
+    }
+
 }
+foreach ($output as $out)
+    echo $out;
+
+//Działa ale dostaje 0 punktów wystarczy odpalic php Quest4.php < x.txt
+//Warunkiem zadania było
