@@ -71,6 +71,7 @@ while(!feof($stdin)) {
         }
         if (count($networksToJoin) == 2) {
             $array = $networksToJoin[1]->getConnections();
+            $array[] = $addresses;
             unset($networksArray[$id[1]]);
             $networksToJoin[0]->joinConnections($array);
         }
@@ -83,14 +84,14 @@ while(!feof($stdin)) {
             }
         }
         if ($control)
-            $output[] = "T \n";
+            $output[] = "T";
         else
-            $output[] = "N \n";
+            $output[] = "N";
     }
 
 }
+//var_dump($networksArray);
 foreach ($output as $out)
-    echo $out;
-
+    echo "$out\n";
+fclose($stdin);
 //Działa ale dostaje 0 punktów wystarczy odpalic php Quest4.php < x.txt
-//Warunkiem zadania było
