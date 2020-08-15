@@ -38,43 +38,45 @@ for($i=0;$i<$relationCount;$i++){
 $attackArray = [];
 function captureUserAndFriends($user, $userID, $network,$cost,$userArray)
 {
-    $networkAfter = $network;
+    array_values($network);
     foreach ((array)$user->friends as $friend) {
         foreach ($network as $index => $key) {
             if ($friend == $key->name) {
                 echo $friend, " ", $key->name;
-                unset($networkAfter[$index]);
+                unset($network[$index]);
             }
         }
     }
-    unset($networkAfter[$userID]);
+    unset($network[$userID]);
+    array_values($network);
     $attackData = (object)[];
     $userArray[] = $user->name;
     $attackData->userArray = $userArray;
     $attackData->cost = $cost + $user->cost;
-    $attackData->networkToCapture = $networkAfter;
+    $attackData->networkToCapture = $network;
     return $attackData;
 }
 function simulateAttack($network,$cost,$userArray){
 
-    $totalcost = 0;
+    $curmin = 999999;
     /**
      * @var $user User
-     * @var $a object[]
      */
-    $cheapest="";
-    $a =[];
-    $result=[];
-    foreach ($network as $id => $user) {
-        $a = captureUserAndFriends($user, $id, $network,$cost,$userArray);
+    //array_values($network);
+    for($id=0;$id<=count($network)/2;$id++){
+        $a = captureUserAndFriends($network[$id], $id, $network,$cost,$userArray);
         if($a->networkToCapture) {
-           $s[] = simulateAttack($a->networkToCapture, $a->cost, $a->userArray);
+            $tem = simulateAttack(array_values($a->networkToCapture), $a->cost, $a->userArray);
+            //var_dump($tem);
+            if($tem->cost<$curmin) {
+                $s = $tem;
+                //var_dump($s);
+                $curmin = $tem->cost;
+            }
+
         }
         else{
             return $a;
-            array_push($result,$a);
-            var_dump($result);
-
         }
     }
     return $s;
@@ -82,14 +84,10 @@ function simulateAttack($network,$cost,$userArray){
 $currMinCost=99999999;
 $cheapestWay=[];
 $attackData = simulateAttack($network,0,[]);
-foreach ($attackData as $data){
-    if($data->cost<$currMinCost){
-        $cheapestWay = $data;
-        $currMinCost = $data->cost;
-    }
-}
-//var_dump($cheapestWay);
-echo count($cheapestWay->userArray),"\n";
-foreach ($cheapestWay->userArray as $user)
+
+//var_dump($attackData);
+
+echo count($attackData->userArray),"\n";
+foreach ($attackData->userArray as $user)
     echo "$user\n";
-echo "$cheapestWay->cost\n";
+echo "$attackData->cost\n";
